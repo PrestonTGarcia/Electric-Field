@@ -46,24 +46,57 @@ def findSigns(x, y, x1, y1, q1, x2, y2, q2):
     # denominators are saved in the case that they are 0
     denom1 = np.power(r1, 3)
     denom2 = np.power(r2, 3)
+    zero = False
     # sets the forces to 0 if the denom is 0
-    if (denom1 == 0): 
-        eForce1X = 0
-        eForce1Y = 0
+    if (denom1 == 0):
+        
+        eForce1X = K * q1 * r1x
+        eForce1Y = K * q1 * r1y
+        zero = True
+        
     else: # calculates the x and y components of the force
+        
         eForce1X = (K * q1 * r1x) / (denom1)
         eForce1Y = (K * q1 * r1y) / (denom1)
+
     if (denom2 == 0):
-        eForce2X = 0
-        eForce2Y = 0
+        
+        eForce2X = K * q2 * r2x
+        eForce2Y = K * q2 * r2y
+        zero = True
+
     else:
+        
         eForce2X = (K * q2 * r2x) / (np.power(r2, 3))
         eForce2Y = (K * q2 * r2y) / (np.power(r2, 3))
+
     eNetForceX = eForce1X + eForce2X
     eNetForceY = eForce1Y + eForce2Y
-    eNetForce = np.sqrt(np.square(eNetForceX) + np.square(eNetForceY))
-    xSign = eNetForceX / np.abs(eNetForceX)
-    ySign = eNetForceY / np.abs(eNetForceY)
+
+    if zero:
+
+        eNetForce = 0
+
+    else:
+
+        eNetForce = np.sqrt(np.square(eNetForceX) + np.square(eNetForceY))
+
+    if eNetForceX == 0:
+
+        xSign = 0
+
+    else:
+
+        xSign = eNetForceX / np.abs(eNetForceX)
+
+    if eNetForceY == 0:
+
+        ySign = 0
+
+    else:
+
+        ySign = eNetForceY / np.abs(eNetForceY)
+
     signsArr = [0.01 * xSign, 0.01 * ySign, eNetForce]
     return signsArr
         
@@ -160,7 +193,7 @@ def main(x1E, y1E, q1E, x2E, y2E, q2E):
             elif forceList[forceIndex] > threshholdOne and forceList[forceIndex] < threshholdTwo:
 
                 plt.arrow(forceXAreas[i], forceYAreas[j], signsList[forceIndex][0],
-                          signsList[forceIndex][1], head_width=0.5, facecolor="#77FF00",
+                          signsList[forceIndex][1], head_width=0.5, facecolor="#06a603",
                           edgecolor="black")
                 
             elif forceList[forceIndex] < threshholdOne:
