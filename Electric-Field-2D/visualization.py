@@ -31,9 +31,10 @@ def findSigns(x, y, x1, y1, q1, x2, y2, q2):
     q2 - The charge of the second particle entered by user
     Return
     ----------
-    signsArr - The dx and dy of the arrow
+    signsArr - The dx, dy and net force of the arrow
     signsArr[0] - The dx
     signsArr[1] - The dy
+    signsArr[2] - Net force
     """
     # r = dx^2 + dy^2
     r1x = x - x1
@@ -60,9 +61,10 @@ def findSigns(x, y, x1, y1, q1, x2, y2, q2):
         eForce2Y = (K * q2 * r2y) / (np.power(r2, 3))
     eNetForceX = eForce1X + eForce2X
     eNetForceY = eForce1Y + eForce2Y
+    eNetForce = np.sqrt(np.square(eNetForceX) + np.square(eNetForceY))
     xSign = eNetForceX / np.abs(eNetForceX)
     ySign = eNetForceY / np.abs(eNetForceY)
-    signsArr = [0.01 * xSign, 0.01 * ySign]
+    signsArr = [0.01 * xSign, 0.01 * ySign, eNetForce]
     return signsArr
         
 
@@ -98,6 +100,8 @@ def main(x1E, y1E, q1E, x2E, y2E, q2E):
     midXFrom2 = (x1 - x2)/3 
     midYFrom1 = (y2 - y1)/3 
     midYFrom2 = (y1 - y2)/3
+    signsList = []
+    forceList = []
     forceXAreas = np.arange(min(x1, x2) - 10, max(x1, x2) + 10, 1)
     forceYAreas = np.arange(min(y1, y2) - 10, max(y1, y2) + 10, 1)
     plt.title("y vs. x")
@@ -122,6 +126,51 @@ def main(x1E, y1E, q1E, x2E, y2E, q2E):
 
         plt.plot(x2, y2, 'ro')
 
+    # Electric field arrows
+    for i in range(0, len(forceXAreas)):
+
+        for j in range(0, len(forceYAreas)):
+
+            forceSigns = (findSigns(forceXAreas[i], forceYAreas[j], x1, y1, q1,
+                                    x2, y2, q2))
+            signsList.append([forceSigns[0], forceSigns[1]])
+            forceList.append(forceSigns[2])
+            #plt.arrow(forceXAreas[i], forceYAreas[j], signs[0], signs[1], head_width=0.3) 
+    threshholdOne = np.average(forceList) / 3
+    threshholdTwo = threshholdOne * 2
+    threshholdThree = threshholdOne * 3
+    forceIndex = 0
+    
+    for i in range(0, len(forceXAreas)):
+
+        for j in range(0, len(forceYAreas)):
+
+            if forceList[forceIndex] > threshholdThree:
+
+                plt.arrow(forceXAreas[i], forceYAreas[j], signsList[forceIndex][0],
+                          signsList[forceIndex][1], head_width=0.5, facecolor="#FF0000",
+                          edgecolor="black")
+
+            elif forceList[forceIndex] > threshholdTwo and forceList[forceIndex] < threshholdThree:
+
+                plt.arrow(forceXAreas[i], forceYAreas[j], signsList[forceIndex][0],
+                          signsList[forceIndex][1], head_width=0.5, facecolor="#FF7700",
+                          edgecolor="black")
+
+            elif forceList[forceIndex] > threshholdOne and forceList[forceIndex] < threshholdTwo:
+
+                plt.arrow(forceXAreas[i], forceYAreas[j], signsList[forceIndex][0],
+                          signsList[forceIndex][1], head_width=0.5, facecolor="#77FF00",
+                          edgecolor="black")
+                
+            elif forceList[forceIndex] < threshholdOne:
+
+                plt.arrow(forceXAreas[i], forceYAreas[j], signsList[forceIndex][0],
+                          signsList[forceIndex][1], head_width=0.5, facecolor="#00FF00",
+                          edgecolor="black")
+                          
+            forceIndex += 1
+
     # Coloumb force arrows
     if (q2/q1 > 0):
 
@@ -133,13 +182,5 @@ def main(x1E, y1E, q1E, x2E, y2E, q2E):
         plt.arrow(x1, y1, midXFrom1, midYFrom1, head_width=0.5)
         plt.arrow(x2, y2, midXFrom2, midYFrom2, head_width=0.5)
 
-    # Electric field arrows
-    for i in range(0, len(forceXAreas)):
-
-        for j in range(0, len(forceYAreas)):
-
-            signs = findSigns(forceXAreas[i], forceYAreas[j], x1, y1, q1,
-                              x2, y2, q2)
-            plt.arrow(forceXAreas[i], forceYAreas[j], signs[0], signs[1], head_width=0.3) 
-
     plt.show()
+    
