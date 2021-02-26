@@ -56,10 +56,11 @@ def findSigns(x, y, z, x1, y1, z1, q1, x2, y2, z2, q2):
     q2 - The charge of the second particle entered by user
     Return
     ----------
-    signsArr - The xf, yf, and zf of the arrows
+    signsArr - The xf, yf, zf, and net force of the arrows
     signsArr[0] - The xf
     signsArr[1] - The yf
     signsArr[2] - The zf
+    signs
     """
     r1x = x - x1
     r1y = y - y1
@@ -90,7 +91,8 @@ def findSigns(x, y, z, x1, y1, z1, q1, x2, y2, z2, q2):
     eNetX = eForce1X + eForce2X
     eNetY = eForce1Y + eForce2Y
     eNetZ = eForce1Z + eForce2Z
-    signsArr = [eNetX / np.abs(eNetX), eNetY / np.abs(eNetY), eNetZ / np.abs(eNetZ)]
+    eNetForce = np.sqrt(np.square(eNetX) + np.square(eNetY) + np.square(eNetZ))
+    signsArr = [eNetX / np.abs(eNetX), eNetY / np.abs(eNetY), eNetZ / np.abs(eNetZ), eNetForce]
     return signsArr
 
 def main(x1E, y1E, z1E, q1E, x2E, y2E, z2E, q2E):
@@ -131,6 +133,8 @@ def main(x1E, y1E, z1E, q1E, x2E, y2E, z2E, q2E):
     midXFrom2 = -midXFrom1
     midYFrom2 = -midYFrom1
     midZFrom2 = -midYFrom1
+    signsList = []
+    forceList = []
     forceXAreas = np.arange(min(x1, x2) - 10, max(x1, x2) + 10, 5)
     forceYAreas = np.arange(min(y1, y2) - 10, max(y1, y2) + 10, 5)
     forceZAreas = np.arange(min(z1, z2) - 10, max(z1, z2) + 10, 5)
@@ -176,8 +180,41 @@ def main(x1E, y1E, z1E, q1E, x2E, y2E, z2E, q2E):
 
             for k in range(0, len(forceZAreas)):
 
-                signs = findSigns(forceXAreas[i], forceYAreas[j], forceZAreas[k], x1, y1, z1,
+                forceSigns = findSigns(forceXAreas[i], forceYAreas[j], forceZAreas[k], x1, y1, z1,
                                   q1, x2, y2, z2, q2)
-                ax.quiver(forceXAreas[i], forceYAreas[j], forceZAreas[k], signs[0], signs[1], signs[2])
+                signsList.append([forceSigns[0], forceSigns[1], forceSigns[2]])
+                forceList.append(forceSigns[3])
+                #ax.quiver(forceXAreas[i], forceYAreas[j], forceZAreas[k], signs[0], signs[1], signs[2])
+    threshholdOne = np.average(forceList) / 3
+    threshholdTwo = threshholdOne * 2
+    threshholdThree = threshholdOne * 3
+    forceIndex = 0
 
+    for i in range(0, len(forceXAreas)):
+
+        for j in range(0, len(forceYAreas)):
+
+            for k in range(0, len(forceZAreas)):
+
+                if forceList[forceIndex] > threshholdThree:
+
+                    ax.quiver(forceXAreas[i], forceYAreas[j], forceZAreas[k], signsList[forceIndex][0],
+                              signsList[forceIndex][1], signsList[forceIndex][2], color="red")
+
+                elif forceList[forceIndex] > threshholdTwo and forceList[forceIndex] < threshholdThree:
+
+                    ax.quiver(forceXAreas[i], forceYAreas[j], forceZAreas[k], signsList[forceIndex][0],
+                              signsList[forceIndex][1], signsList[forceIndex][2], color="orange")
+                    
+                elif forceList[forceIndex] > threshholdOne and forceList[forceIndex] < threshholdTwo:
+
+                    ax.quiver(forceXAreas[i], forceYAreas[j], forceZAreas[k], signsList[forceIndex][0],
+                              signsList[forceIndex][1], signsList[forceIndex][2], color="yellow")
+
+                elif forceList[forceIndex] < threshholdOne:
+
+                    ax.quiver(forceXAreas[i], forceYAreas[j], forceZAreas[k], signsList[forceIndex][0],
+                              signsList[forceIndex][1], signsList[forceIndex][2], color="green")
+                forceIndex += 1
     plt.show()
+
