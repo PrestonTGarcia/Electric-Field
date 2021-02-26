@@ -193,7 +193,7 @@ def main(x1E, y1E, q1E, x2E, y2E, q2E):
             elif forceList[forceIndex] > threshholdOne and forceList[forceIndex] < threshholdTwo:
 
                 plt.arrow(forceXAreas[i], forceYAreas[j], signsList[forceIndex][0],
-                          signsList[forceIndex][1], head_width=0.5, facecolor="#06a603",
+                          signsList[forceIndex][1], head_width=0.5, facecolor="#FFFF00",
                           edgecolor="black")
                 
             elif forceList[forceIndex] < threshholdOne:
